@@ -7,6 +7,12 @@ import { handlesHandler } from "./handles.js";
 import { projectsHandler, projectDetailHandler } from "./projects.js";
 import { analyticsHandler } from "./analytics.js";
 import { dmConversationsHandler, dmConversationDetailHandler } from "./dm-conversations.js";
+import {
+  conversionFunnelHandler,
+  conversationTimelineHandler,
+  retrospectivesHandler,
+  templatePerformanceHandler,
+} from "./insights.js";
 
 export function registerDataHandlers(ctx: PluginContext) {
   ctx.data.register("feeds", feedsHandler);
@@ -18,4 +24,8 @@ export function registerDataHandlers(ctx: PluginContext) {
   ctx.data.register("analytics", analyticsHandler);
   ctx.data.register("dm-conversations", dmConversationsHandler);
   ctx.data.register("dm-conversation-detail", dmConversationDetailHandler);
+  ctx.data.register("conversion-funnel", conversionFunnelHandler);
+  ctx.data.register("conversation-timeline", conversationTimelineHandler);
+  ctx.data.register("retrospectives", retrospectivesHandler);
+  ctx.data.register("template-performance", templatePerformanceHandler);
 }

@@ -7,6 +7,7 @@ import { handleScrapeX } from "./scrape-x.js";
 import { handleScoreTweet } from "./score-tweet.js";
 import { handleSendReply } from "./send-reply.js";
 import { handleSendDm } from "./send-dm.js";
+import { handleOutreachRetrospectiveTool } from "./outreach-retrospective.js";
 
 export function registerToolHandlers(ctx: PluginContext): void {
   ctx.tools.register(
@@ -107,23 +108,22 @@ export function registerToolHandlers(ctx: PluginContext): void {
     {
       displayName: "Outreach Retrospective",
       description:
-        "Generate an AI retrospective analysis for a closed lead (Phase 5 — not yet implemented).",
+        "Generate an AI retrospective analysis for a closed lead or batch of leads within a period.",
       parametersSchema: {
         type: "object",
         properties: {
-          leadId: { type: "string", description: "Lead ID to analyze" },
+          leadId: { type: "string", description: "Lead ID to analyze (single lead mode)" },
           outcome: {
             type: "string",
             description: "Final outcome: converted | rejected | no_response | snoozed",
           },
           notes: { type: "string", description: "Optional human notes about the outcome" },
+          periodDays: { type: "number", description: "Analyze terminal leads from the last N days (batch mode)" },
+          projectId: { type: "string", description: "Filter by project ID" },
         },
-        required: ["leadId", "outcome"],
       },
     },
-    async (): Promise<ToolResult> => ({
-      content: JSON.stringify({ error: "Not yet implemented — Phase 5" }),
-    }),
+    (p: unknown, r: ToolRunContext): Promise<ToolResult> => handleOutreachRetrospectiveTool(ctx, p, r),
   );
 
   ctx.logger.info("Tool handlers registered: search-x, scrape-x, score-tweet, send-reply, send-dm, outreach-retrospective");

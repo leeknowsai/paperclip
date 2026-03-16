@@ -13,6 +13,7 @@ import { handleProcessOutreach } from "./jobs/process-outreach.js";
 import { handleFollowUpCheck } from "./jobs/follow-up-check.js";
 import { handleDailyCleanup } from "./jobs/daily-cleanup.js";
 import { handleTgGroupSync } from "./jobs/tg-group-sync.js";
+import { handleWeeklyRetrospective } from "./jobs/weekly-retrospective.js";
 import { registerDataHandlers } from "./data/index.js";
 import { registerActionHandlers } from "./actions/index.js";
 import { registerToolHandlers } from "./tools/index.js";
@@ -92,7 +93,9 @@ const plugin = definePlugin({
     });
 
     ctx.jobs.register(JOB_KEYS.weeklyRetrospective, async () => {
-      ctx.logger.info("weekly-retrospective: not yet implemented");
+      ctx.logger.info("[job] weekly-retrospective starting");
+      await handleWeeklyRetrospective(ctx);
+      ctx.logger.info("[job] weekly-retrospective complete");
     });
 
     ctx.jobs.register(JOB_KEYS.dailyCleanup, async () => {
