@@ -104,7 +104,7 @@ export async function handleTgGroupSync(ctx: PluginContext): Promise<void> {
         insertedCount++;
 
         // Emit tg-message event
-        ctx.events.emit(EVENT_NAMES.tgMessage, {
+        ctx.events.emit(EVENT_NAMES.tgMessage, "", {
           groupId,
           projectId: project.id,
           sender: {
@@ -171,7 +171,7 @@ export async function handleTgGroupSync(ctx: PluginContext): Promise<void> {
           newMemberCount++;
 
           // Emit tg-member-joined event
-          ctx.events.emit(EVENT_NAMES.tgMemberJoined, {
+          ctx.events.emit(EVENT_NAMES.tgMemberJoined, "", {
             groupId,
             projectId: project.id,
             username: member.username,
@@ -191,7 +191,7 @@ export async function handleTgGroupSync(ctx: PluginContext): Promise<void> {
               .where(eq(leads.id, lead.id))
               .run();
 
-            ctx.events.emit(EVENT_NAMES.leadConverted, {
+            ctx.events.emit(EVENT_NAMES.leadConverted, "", {
               leadId: lead.id,
               handle: lead.handle,
               projectId: project.id,
