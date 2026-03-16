@@ -126,6 +126,18 @@ const manifest: PaperclipPluginManifestV1 = {
             type: "string",
             title: "Errors Channel ID",
           },
+          ceoDecisions: {
+            type: "string",
+            title: "CEO Decisions Channel ID",
+          },
+          dailyDigest: {
+            type: "string",
+            title: "Daily Digest Channel ID",
+          },
+          tgPartnersForum: {
+            type: "string",
+            title: "TG Partners Forum Channel ID",
+          },
         },
       },
     },
