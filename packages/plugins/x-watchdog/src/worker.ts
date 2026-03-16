@@ -8,6 +8,10 @@ import {
 import { getDb, pushSchema, closeDb } from "./db/index.js";
 import { JOB_KEYS } from "./constants.js";
 import { handleHourlyFetch } from "./jobs/hourly-fetch.js";
+import { handleDmSync } from "./jobs/dm-sync.js";
+import { handleProcessOutreach } from "./jobs/process-outreach.js";
+import { handleFollowUpCheck } from "./jobs/follow-up-check.js";
+import { handleDailyCleanup } from "./jobs/daily-cleanup.js";
 import { registerDataHandlers } from "./data/index.js";
 import { registerActionHandlers } from "./actions/index.js";
 
@@ -53,15 +57,21 @@ const plugin = definePlugin({
     });
 
     ctx.jobs.register(JOB_KEYS.dmSync, async () => {
-      ctx.logger.info("dm-sync: not yet implemented");
+      ctx.logger.info("[job] dm-sync starting");
+      await handleDmSync(ctx);
+      ctx.logger.info("[job] dm-sync complete");
     });
 
     ctx.jobs.register(JOB_KEYS.processOutreach, async () => {
-      ctx.logger.info("process-outreach: not yet implemented");
+      ctx.logger.info("[job] process-outreach starting");
+      await handleProcessOutreach(ctx);
+      ctx.logger.info("[job] process-outreach complete");
     });
 
     ctx.jobs.register(JOB_KEYS.followUpCheck, async () => {
-      ctx.logger.info("follow-up-check: not yet implemented");
+      ctx.logger.info("[job] follow-up-check starting");
+      await handleFollowUpCheck(ctx);
+      ctx.logger.info("[job] follow-up-check complete");
     });
 
     ctx.jobs.register(JOB_KEYS.tgGroupSync, async () => {
@@ -73,7 +83,9 @@ const plugin = definePlugin({
     });
 
     ctx.jobs.register(JOB_KEYS.dailyCleanup, async () => {
-      ctx.logger.info("daily-cleanup: not yet implemented");
+      ctx.logger.info("[job] daily-cleanup starting");
+      await handleDailyCleanup(ctx);
+      ctx.logger.info("[job] daily-cleanup complete");
     });
 
     ctx.logger.info("X Watchdog plugin ready");
