@@ -1,0 +1,30 @@
+{
+  "name": "@paperclipai/plugin-x-watchdog",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "paperclipPlugin": {
+    "manifest": "./dist/manifest.js",
+    "worker": "./dist/worker.js",
+    "ui": "./dist/ui/"
+  },
+  "scripts": {
+    "prebuild": "node ../../../scripts/ensure-plugin-build-deps.mjs",
+    "build": "tsc && node ./scripts/build-ui.mjs",
+    "clean": "rm -rf dist",
+    "typecheck": "pnpm --filter @paperclipai/plugin-sdk build && tsc --noEmit"
+  },
+  "dependencies": {
+    "@paperclipai/plugin-sdk": "workspace:*",
+    "@paperclipai/shared": "workspace:*",
+    "better-sqlite3": "^11.0.0",
+    "drizzle-orm": "^0.38.0",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "drizzle-kit": "^0.30.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  }
+}
