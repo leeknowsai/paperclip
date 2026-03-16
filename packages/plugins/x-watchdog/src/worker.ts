@@ -14,6 +14,11 @@ import { handleFollowUpCheck } from "./jobs/follow-up-check.js";
 import { handleDailyCleanup } from "./jobs/daily-cleanup.js";
 import { registerDataHandlers } from "./data/index.js";
 import { registerActionHandlers } from "./actions/index.js";
+import { registerToolHandlers } from "./tools/index.js";
+import { handleOAuthCallback } from "./actions/oauth-flow.js";
+
+// Captured during setup(), used by onWebhook (which has no ctx parameter)
+let _ctx: PluginContext | null = null;
 
 export type XWatchdogConfig = {
   xBearerTokenRef?: string;
@@ -35,6 +40,7 @@ export type XWatchdogConfig = {
 
 const plugin = definePlugin({
   async setup(ctx: PluginContext) {
+    _ctx = ctx;
     ctx.logger.info("X Watchdog plugin starting...");
 
     const db = getDb();
@@ -48,6 +54,10 @@ const plugin = definePlugin({
     // Register action handlers (write operations from UI/agents)
     registerActionHandlers(ctx);
     ctx.logger.info("Action handlers registered");
+
+    // Register tool handlers (for agents)
+    registerToolHandlers(ctx);
+    ctx.logger.info("Tool handlers registered");
 
     // Hourly fetch: scrape tweets, score, detect leads
     ctx.jobs.register(JOB_KEYS.hourlyFetch, async () => {
@@ -101,10 +111,11 @@ const plugin = definePlugin({
 
   async onWebhook(input: PluginWebhookInput): Promise<void> {
     if (input.endpointKey === "oauth-callback") {
-      // OAuth 2.0 PKCE callback — to be implemented in Task 12
-      console.info("oauth-callback webhook received (not yet implemented)", {
-        requestId: input.requestId,
-      });
+      if (!_ctx) {
+        console.error("[onWebhook] ctx not yet initialized — ignoring oauth-callback");
+        return;
+      }
+      await handleOAuthCallback(_ctx, input);
     }
   },
 });
