@@ -32,6 +32,8 @@ const manifest: PaperclipPluginManifestV1 = {
     "issues.read",
     "issues.create",
     "instance.settings.register",
+    "ui.page.register",
+    "ui.dashboardWidget.register",
   ],
 
   entrypoints: {
