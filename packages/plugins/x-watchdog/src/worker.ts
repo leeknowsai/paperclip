@@ -7,6 +7,9 @@ import {
 } from "@paperclipai/plugin-sdk";
 import { getDb, pushSchema, closeDb } from "./db/index.js";
 import { JOB_KEYS } from "./constants.js";
+import { handleHourlyFetch } from "./jobs/hourly-fetch.js";
+import { registerDataHandlers } from "./data/index.js";
+import { registerActionHandlers } from "./actions/index.js";
 
 export type XWatchdogConfig = {
   xBearerTokenRef?: string;
@@ -34,9 +37,19 @@ const plugin = definePlugin({
     pushSchema(db);
     ctx.logger.info("Database initialized");
 
-    // Register stub job handlers for all 7 jobs
+    // Register data handlers (read queries for UI)
+    registerDataHandlers(ctx);
+    ctx.logger.info("Data handlers registered");
+
+    // Register action handlers (write operations from UI/agents)
+    registerActionHandlers(ctx);
+    ctx.logger.info("Action handlers registered");
+
+    // Hourly fetch: scrape tweets, score, detect leads
     ctx.jobs.register(JOB_KEYS.hourlyFetch, async () => {
-      ctx.logger.info("hourly-fetch: not yet implemented");
+      ctx.logger.info("[job] hourly-fetch starting");
+      await handleHourlyFetch(ctx);
+      ctx.logger.info("[job] hourly-fetch complete");
     });
 
     ctx.jobs.register(JOB_KEYS.dmSync, async () => {
@@ -63,7 +76,7 @@ const plugin = definePlugin({
       ctx.logger.info("daily-cleanup: not yet implemented");
     });
 
-    ctx.logger.info("X Watchdog plugin ready (Phase 1 — foundation only)");
+    ctx.logger.info("X Watchdog plugin ready");
   },
 
   async onShutdown() {

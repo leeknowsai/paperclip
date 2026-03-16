@@ -27,6 +27,11 @@ export function pushSchema(db: ReturnType<typeof drizzle>): void {
 
 function createTablesIfNotExist(sqlite: Database.Database): void {
   sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS configs (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS handles (
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL,

@@ -6,6 +6,12 @@ import {
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 
+// Key-value config store (mirrors D1 configs table)
+export const configs = sqliteTable("configs", {
+  key: text("key").primaryKey(),
+  value: text("value"),
+});
+
 export const handles = sqliteTable("handles", {
   id: text("id").primaryKey(),
   username: text("username").notNull(),
