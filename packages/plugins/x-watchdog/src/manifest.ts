@@ -59,6 +59,16 @@ const manifest: PaperclipPluginManifestV1 = {
         title: "TwitterAPI.io Key (secret ref)",
         description: "Secret reference for TwitterAPI.io key used for bio enrichment",
       },
+      rapidApiKeyRef: {
+        type: "string",
+        title: "RapidAPI Key (secret ref)",
+        description: "Secret reference for RapidAPI key used for X profile enrichment",
+      },
+      minimaxApiKeyRef: {
+        type: "string",
+        title: "MiniMax API Key (secret ref)",
+        description: "Secret reference for MiniMax API key",
+      },
       xOAuthClientId: {
         type: "string",
         title: "X OAuth Client ID",

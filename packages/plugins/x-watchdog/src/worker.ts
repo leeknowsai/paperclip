@@ -26,6 +26,8 @@ export type XWatchdogConfig = {
   xBearerTokenRef?: string;
   openaiApiKeyRef?: string;
   twitterApiIoKeyRef?: string;
+  rapidApiKeyRef?: string;
+  minimaxApiKeyRef?: string;
   xOAuthClientId?: string;
   xOAuthClientSecretRef?: string;
   notificationThreshold?: number;
