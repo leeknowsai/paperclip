@@ -12,6 +12,7 @@ import { handleDmSync } from "./jobs/dm-sync.js";
 import { handleProcessOutreach } from "./jobs/process-outreach.js";
 import { handleFollowUpCheck } from "./jobs/follow-up-check.js";
 import { handleDailyCleanup } from "./jobs/daily-cleanup.js";
+import { handleTgGroupSync } from "./jobs/tg-group-sync.js";
 import { registerDataHandlers } from "./data/index.js";
 import { registerActionHandlers } from "./actions/index.js";
 import { registerToolHandlers } from "./tools/index.js";
@@ -85,7 +86,9 @@ const plugin = definePlugin({
     });
 
     ctx.jobs.register(JOB_KEYS.tgGroupSync, async () => {
-      ctx.logger.info("tg-group-sync: not yet implemented");
+      ctx.logger.info("[job] tg-group-sync starting");
+      await handleTgGroupSync(ctx);
+      ctx.logger.info("[job] tg-group-sync complete");
     });
 
     ctx.jobs.register(JOB_KEYS.weeklyRetrospective, async () => {
