@@ -3,8 +3,11 @@ import { usePluginData, usePluginAction } from "@paperclipai/plugin-sdk/ui";
 import type { PluginPageProps } from "@paperclipai/plugin-sdk/ui";
 import { TweetCard } from "../components/tweet-card.js";
 import { LeadRow } from "../components/lead-row.js";
+import { ScanHistory } from "../components/scan-history.js";
+import { AccountMapEditor } from "../components/account-map-editor.js";
+import { KeywordsDisplay } from "../components/keywords-display.js";
 
-type Tab = "projects" | "leads" | "feed" | "dms" | "insights";
+type Tab = "projects" | "leads" | "feed" | "dms" | "insights" | "search";
 
 const tabDefs: { key: Tab; label: string }[] = [
   { key: "projects", label: "Projects" },
@@ -12,6 +15,7 @@ const tabDefs: { key: Tab; label: string }[] = [
   { key: "feed", label: "Feed" },
   { key: "dms", label: "DMs" },
   { key: "insights", label: "Insights" },
+  { key: "search", label: "Search" },
 ];
 
 // -- Theme-aware styles --
@@ -450,11 +454,35 @@ function InsightsTab() {
   );
 }
 
+// --------------- Search Tab ---------------
+
+function SearchTab() {
+  const { data: chromeData, refresh: refreshChrome } = usePluginData<{
+    data: { accountMap: Record<string, { chromeProfile: string; xUsername: string }>; lastScan: any };
+  }>("chrome-settings");
+  const { data: projectsRaw } = usePluginData<{
+    data: Array<{ id: string; name: string; triggerKeywords?: string | null }>;
+  }>("projects");
+
+  const projects = projectsRaw?.data ?? [];
+
+  return (
+    <div style={{ display: "grid", gap: "12px" }}>
+      <ScanHistory lastScan={chromeData?.data?.lastScan} />
+      <AccountMapEditor
+        accountMap={chromeData?.data?.accountMap ?? {}}
+        onSaved={refreshChrome}
+      />
+      <KeywordsDisplay projects={projects} />
+    </div>
+  );
+}
+
 // --------------- Main Dashboard ---------------
 
 export function WatchdogDashboard({ context }: PluginPageProps) {
   const [tab, setTab] = useState<Tab>("projects");
-  const Content = { projects: ProjectsTab, leads: LeadsTab, feed: FeedTab, dms: DMsTab, insights: InsightsTab }[tab];
+  const Content = { projects: ProjectsTab, leads: LeadsTab, feed: FeedTab, dms: DMsTab, insights: InsightsTab, search: SearchTab }[tab];
 
   return (
     <div style={{ display: "grid", gap: "14px" }}>
