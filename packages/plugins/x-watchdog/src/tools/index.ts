@@ -8,6 +8,9 @@ import { handleScoreTweet } from "./score-tweet.js";
 import { handleSendReply } from "./send-reply.js";
 import { handleSendDm } from "./send-dm.js";
 import { handleOutreachRetrospectiveTool } from "./outreach-retrospective.js";
+import { handleChromeOpen } from "./chrome-open.js";
+import { handleChromeScrape } from "./chrome-scrape.js";
+import { handleChromeSetup } from "./chrome-setup.js";
 
 export function registerToolHandlers(ctx: PluginContext): void {
   ctx.tools.register(
@@ -126,5 +129,55 @@ export function registerToolHandlers(ctx: PluginContext): void {
     (p: unknown, r: ToolRunContext): Promise<ToolResult> => handleOutreachRetrospectiveTool(ctx, p, r),
   );
 
-  ctx.logger.info("Tool handlers registered: search-x, scrape-x, score-tweet, send-reply, send-dm, outreach-retrospective");
+  ctx.tools.register(
+    TOOL_NAMES.chromeOpen,
+    {
+      displayName: "Chrome Open X Search",
+      description:
+        "Open X search tabs in Chrome profiles for each active project's keywords. Run before chrome-scrape.",
+      parametersSchema: {
+        type: "object",
+        properties: {},
+      },
+    },
+    (p: unknown, r: ToolRunContext): Promise<ToolResult> => handleChromeOpen(ctx, p, r),
+  );
+
+  ctx.tools.register(
+    TOOL_NAMES.chromeScrape,
+    {
+      displayName: "Chrome Scrape X Tabs",
+      description:
+        "Scrape tweets from open X search tabs via CDP, AI-score them, store to DB, and detect leads.",
+      parametersSchema: {
+        type: "object",
+        properties: {
+          limit: { type: "number", description: "Max number of tabs to scrape" },
+          skipScore: { type: "boolean", description: "Skip AI scoring (store raw tweets only)" },
+        },
+      },
+    },
+    (p: unknown, r: ToolRunContext): Promise<ToolResult> => handleChromeScrape(ctx, p, r),
+  );
+
+  ctx.tools.register(
+    TOOL_NAMES.chromeSetup,
+    {
+      displayName: "Chrome Profile Setup",
+      description:
+        "Create Chrome profiles for each account in the account map, injecting X auth cookies.",
+      parametersSchema: {
+        type: "object",
+        properties: {
+          sourceProfile: {
+            type: "string",
+            description: "Chrome profile directory to copy cookies from (default: Default)",
+          },
+        },
+      },
+    },
+    (p: unknown, r: ToolRunContext): Promise<ToolResult> => handleChromeSetup(ctx, p, r),
+  );
+
+  ctx.logger.info("Tool handlers registered: search-x, scrape-x, score-tweet, send-reply, send-dm, outreach-retrospective, chrome-open, chrome-scrape, chrome-setup");
 }

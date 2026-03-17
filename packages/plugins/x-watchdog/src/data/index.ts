@@ -1,6 +1,7 @@
 // Registers all data handlers with the plugin context.
 
 import type { PluginContext } from "@paperclipai/plugin-sdk";
+import { STATE_KEYS } from "../constants.js";
 import { feedsHandler } from "./feeds.js";
 import { leadsHandler, leadDetailHandler } from "./leads.js";
 import { handlesHandler } from "./handles.js";
@@ -28,6 +29,13 @@ export function registerDataHandlers(ctx: PluginContext) {
   ctx.data.register("conversation-timeline", conversationTimelineHandler);
   ctx.data.register("retrospectives", retrospectivesHandler);
   ctx.data.register("template-performance", templatePerformanceHandler);
+
+  // Chrome integration settings: account map and last scan state
+  ctx.data.register("chrome-settings", async () => {
+    const accountMap = (await ctx.state.get(STATE_KEYS.chromeAccountMap)) ?? {};
+    const lastScan = (await ctx.state.get(STATE_KEYS.chromeLastScan)) ?? null;
+    return { data: { accountMap, lastScan } };
+  });
 
   // Expose plugin config (instance config + UI-saved settings) for settings UI
   ctx.data.register("plugin-config", async () => {

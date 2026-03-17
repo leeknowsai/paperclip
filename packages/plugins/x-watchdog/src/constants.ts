@@ -8,6 +8,9 @@ export const TOOL_NAMES = {
   sendReply: "send-reply",
   sendDm: "send-dm",
   outreachRetrospective: "outreach-retrospective",
+  chromeOpen: "chrome-open",
+  chromeScrape: "chrome-scrape",
+  chromeSetup: "chrome-setup",
 } as const;
 
 export const JOB_KEYS = {
@@ -40,6 +43,8 @@ export const STATE_KEYS = {
   oauthAccounts: { scopeKind: "instance" as const, stateKey: "oauth_connected_accounts" },
   tgSession: { scopeKind: "instance" as const, stateKey: "tg_session" },
   lastSync: (jobKey: string) => ({ scopeKind: "instance" as const, stateKey: `last_sync_${jobKey}` }),
+  chromeAccountMap: { scopeKind: "instance" as const, stateKey: "chrome-account-map" },
+  chromeLastScan: { scopeKind: "instance" as const, stateKey: "chrome-last-scan" },
 } as const;
 
 export const EVENT_NAMES = {

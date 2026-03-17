@@ -140,6 +140,17 @@ const manifest: PaperclipPluginManifestV1 = {
           },
         },
       },
+      chromeBin: {
+        type: "string",
+        title: "Chrome Binary Path",
+        description: "Path to Google Chrome executable for CDP-based scraping",
+      },
+      cdpPort: {
+        type: "number",
+        title: "Chrome CDP Port",
+        description: "Remote debugging port for Chrome DevTools Protocol (default: 9222)",
+        default: 9222,
+      },
     },
   },
 
@@ -331,6 +342,50 @@ const manifest: PaperclipPluginManifestV1 = {
           },
         },
         required: ["leadId", "outcome"],
+      },
+    },
+    {
+      name: TOOL_NAMES.chromeOpen,
+      displayName: "Chrome Open X Search",
+      description:
+        "Open X search tabs in Chrome profiles for each active project's keywords. Run before chrome-scrape.",
+      parametersSchema: {
+        type: "object",
+        properties: {},
+      },
+    },
+    {
+      name: TOOL_NAMES.chromeScrape,
+      displayName: "Chrome Scrape X Tabs",
+      description:
+        "Scrape tweets from open X search tabs via CDP, AI-score them, store to DB, and detect leads.",
+      parametersSchema: {
+        type: "object",
+        properties: {
+          limit: {
+            type: "number",
+            description: "Max number of tabs to scrape",
+          },
+          skipScore: {
+            type: "boolean",
+            description: "Skip AI scoring (store raw tweets only)",
+          },
+        },
+      },
+    },
+    {
+      name: TOOL_NAMES.chromeSetup,
+      displayName: "Chrome Profile Setup",
+      description:
+        "Create Chrome profiles for each account in the account map, injecting X auth cookies.",
+      parametersSchema: {
+        type: "object",
+        properties: {
+          sourceProfile: {
+            type: "string",
+            description: "Chrome profile directory to copy cookies from (default: Default)",
+          },
+        },
       },
     },
   ],

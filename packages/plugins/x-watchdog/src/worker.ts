@@ -6,7 +6,7 @@ import {
   type PluginWebhookInput,
 } from "@paperclipai/plugin-sdk";
 import { getDb, pushSchema, closeDb } from "./db/index.js";
-import { JOB_KEYS } from "./constants.js";
+import { JOB_KEYS, STATE_KEYS } from "./constants.js";
 import { handleHourlyFetch } from "./jobs/hourly-fetch.js";
 import { handleDmSync } from "./jobs/dm-sync.js";
 import { handleProcessOutreach } from "./jobs/process-outreach.js";
@@ -62,6 +62,21 @@ const plugin = definePlugin({
     // Register tool handlers (for agents)
     registerToolHandlers(ctx);
     ctx.logger.info("Tool handlers registered");
+
+    // Seed default Chrome account map if not yet set
+    const existingAccountMap = await ctx.state.get(STATE_KEYS.chromeAccountMap);
+    if (!existingAccountMap || Object.keys(existingAccountMap as object).length === 0) {
+      await ctx.state.set(STATE_KEYS.chromeAccountMap, {
+        clawfriend: { chromeProfile: "Profile 9", xUsername: "clawfriend_ai" },
+        clawquest: { chromeProfile: "Profile 7", xUsername: "clawquest_ai" },
+        leeknowsai: { chromeProfile: "Profile 8", xUsername: "leeknowsAI" },
+        leeclaws: { chromeProfile: "Profile 10", xUsername: "leeclaws" },
+        onclaw: { chromeProfile: "Profile 11", xUsername: "OnClawAI" },
+        whalesmarket: { chromeProfile: "Profile 1", xUsername: "WhalesMarket" },
+        "web3-skills": { chromeProfile: "Profile 8", xUsername: "leeknowsAI" },
+      });
+      ctx.logger.info("Seeded default Chrome account map");
+    }
 
     // Hourly fetch: scrape tweets, score, detect leads
     ctx.jobs.register(JOB_KEYS.hourlyFetch, async () => {
