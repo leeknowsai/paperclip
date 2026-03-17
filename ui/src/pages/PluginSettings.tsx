@@ -61,7 +61,7 @@ export function PluginSettings() {
   const { selectedCompany, selectedCompanyId } = useCompany();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { companyPrefix, pluginId } = useParams<{ companyPrefix?: string; pluginId: string }>();
-  const [activeTab, setActiveTab] = useState<"configuration" | "status">("configuration");
+  const [activeTab, setActiveTab] = useState<"configuration" | "status" | "dashboard">("configuration");
 
   const { data: plugin, isLoading: pluginLoading } = useQuery({
     queryKey: queryKeys.plugins.detail(pluginId!),
@@ -101,13 +101,16 @@ export function PluginSettings() {
   });
 
   const { slots } = usePluginSlots({
-    slotTypes: ["settingsPage"],
+    slotTypes: ["settingsPage", "page"],
     companyId: selectedCompanyId,
     enabled: !!selectedCompanyId,
   });
 
-  // Filter slots to only show settings pages for this specific plugin
-  const pluginSlots = slots.filter((slot) => slot.pluginId === pluginId);
+  // Filter slots to only show pages for this specific plugin
+  const allPluginSlots = slots.filter((slot) => slot.pluginId === pluginId);
+  const pluginSlots = allPluginSlots.filter((s) => s.type === "settingsPage");
+  const pageSlots = allPluginSlots.filter((s) => s.type === "page");
+  const hasPageSlot = pageSlots.length > 0;
 
   // If the plugin has a custom settingsPage slot, prefer that over auto-generated form
   const hasCustomSettingsPage = pluginSlots.length > 0;
@@ -122,8 +125,8 @@ export function PluginSettings() {
   }, [selectedCompany?.name, setBreadcrumbs, companyPrefix, plugin]);
 
   useEffect(() => {
-    setActiveTab("configuration");
-  }, [pluginId]);
+    setActiveTab(hasPageSlot ? "dashboard" : "configuration");
+  }, [pluginId, hasPageSlot]);
 
   if (pluginLoading) {
     return <div className="p-4 text-sm text-muted-foreground">Loading plugin details...</div>;
@@ -163,16 +166,34 @@ export function PluginSettings() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "configuration" | "status")} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="space-y-6">
         <PageTabBar
           align="start"
           items={[
+            ...(hasPageSlot ? [{ value: "dashboard", label: "Dashboard" }] : []),
             { value: "configuration", label: "Configuration" },
             { value: "status", label: "Status" },
           ]}
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "configuration" | "status")}
+          onValueChange={(value) => setActiveTab(value as typeof activeTab)}
         />
+
+        {hasPageSlot && (
+          <TabsContent value="dashboard" className="space-y-6">
+            {pageSlots.map((slot) => (
+              <PluginSlotMount
+                key={`${slot.pluginKey}:${slot.id}`}
+                slot={slot}
+                context={{
+                  companyId: selectedCompanyId,
+                  companyPrefix: companyPrefix ?? null,
+                }}
+                className="min-h-[600px]"
+                missingBehavior="placeholder"
+              />
+            ))}
+          </TabsContent>
+        )}
 
         <TabsContent value="configuration" className="space-y-6">
           <div className="space-y-8">

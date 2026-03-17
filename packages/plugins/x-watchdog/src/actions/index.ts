@@ -15,4 +15,15 @@ export function registerActionHandlers(ctx: PluginContext) {
   ctx.actions.register("update-project", updateProject);
   ctx.actions.register("trigger-job", (params) => triggerJob(ctx, params));
   ctx.actions.register("initiate-oauth", (params) => initiateOAuth(ctx, params));
+
+  // Save plugin config — stores in plugin state since SDK config is read-only
+  ctx.actions.register("update-config", async (params) => {
+    const p = params as Record<string, unknown>;
+    await ctx.state.set(
+      { scopeKind: "instance", stateKey: "plugin_settings" },
+      p,
+    );
+    ctx.logger.info("Plugin settings updated via UI", { keys: Object.keys(p) });
+    return { ok: true };
+  });
 }

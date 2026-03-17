@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { usePluginData, usePluginAction } from "@paperclipai/plugin-sdk/ui";
 import type { PluginPageProps } from "@paperclipai/plugin-sdk/ui";
 import { TweetCard } from "../components/tweet-card.js";
 import { LeadRow } from "../components/lead-row.js";
-import { ScoreBadge } from "../components/score-badge.js";
 
 type Tab = "projects" | "leads" | "feed" | "dms" | "insights";
 
-const tabs: { key: Tab; label: string }[] = [
+const tabDefs: { key: Tab; label: string }[] = [
   { key: "projects", label: "Projects" },
   { key: "leads", label: "Leads" },
   { key: "feed", label: "Feed" },
@@ -15,75 +14,162 @@ const tabs: { key: Tab; label: string }[] = [
   { key: "insights", label: "Insights" },
 ];
 
-const s = {
-  page: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "16px",
-    padding: "16px",
-    maxWidth: "1100px",
-    color: "#e0e0e0",
-  },
-  header: { fontSize: "20px", fontWeight: 700, color: "#e0e0e0", margin: 0 },
-  subtitle: { color: "#666", fontSize: "13px", marginTop: "4px" },
-  tabBar: {
-    display: "flex",
-    gap: "2px",
-    background: "#111",
-    borderRadius: "8px",
-    padding: "3px",
-  },
-  tab: (active: boolean) => ({
-    padding: "6px 16px",
-    borderRadius: "6px",
-    fontSize: "13px",
-    fontWeight: active ? 600 : 400,
-    color: active ? "#e0e0e0" : "#888",
-    background: active ? "#1a1a1a" : "transparent",
-    border: "none",
-    cursor: "pointer" as const,
-  }),
-  card: {
-    background: "#1a1a1a",
-    border: "1px solid #333",
-    borderRadius: "8px",
-    padding: "16px",
-  },
-  empty: { color: "#555", fontSize: "13px", padding: "24px", textAlign: "center" as const },
-  loading: { color: "#666", fontSize: "13px", padding: "24px", textAlign: "center" as const },
-  error: { color: "#ef4444", fontSize: "13px", padding: "12px" },
-  btn: {
-    background: "#1e3a5f",
-    color: "#60a5fa",
-    border: "none",
-    borderRadius: "6px",
-    padding: "6px 14px",
-    fontSize: "13px",
-    fontWeight: 500,
-    cursor: "pointer" as const,
-  },
-  btnGhost: {
-    background: "transparent",
-    color: "#888",
-    border: "1px solid #333",
-    borderRadius: "6px",
-    padding: "6px 14px",
-    fontSize: "13px",
-    cursor: "pointer" as const,
-  },
+// -- Theme-aware styles --
+
+const card: CSSProperties = {
+  border: "1px solid var(--border)",
+  borderRadius: "12px",
+  padding: "14px",
+  background: "var(--card, transparent)",
 };
+
+const subtleCard: CSSProperties = {
+  border: "1px solid color-mix(in srgb, var(--border) 75%, transparent)",
+  borderRadius: "10px",
+  padding: "12px",
+};
+
+const widgetGrid: CSSProperties = {
+  display: "grid",
+  gap: "12px",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+};
+
+const widget: CSSProperties = {
+  border: "1px solid var(--border)",
+  borderRadius: "14px",
+  padding: "14px",
+  display: "grid",
+  gap: "6px",
+  background: "color-mix(in srgb, var(--card, transparent) 72%, transparent)",
+};
+
+const eyebrow: CSSProperties = {
+  fontSize: "11px",
+  opacity: 0.65,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+};
+
+const muted: CSSProperties = { fontSize: "12px", opacity: 0.72, lineHeight: 1.45 };
+
+const btn: CSSProperties = {
+  appearance: "none",
+  border: "1px solid var(--border)",
+  borderRadius: "999px",
+  background: "transparent",
+  color: "inherit",
+  padding: "6px 14px",
+  fontSize: "12px",
+  cursor: "pointer",
+};
+
+const primaryBtn: CSSProperties = {
+  ...btn,
+  background: "color-mix(in srgb, #2563eb 18%, transparent)",
+  borderColor: "color-mix(in srgb, #2563eb 60%, var(--border))",
+  color: "#93c5fd",
+};
+
+const ghostBtn: CSSProperties = { ...btn };
+
+const pill: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  borderRadius: "999px",
+  border: "1px solid var(--border)",
+  padding: "2px 8px",
+  fontSize: "11px",
+};
+
+const input: CSSProperties = {
+  width: "100%",
+  border: "1px solid var(--border)",
+  borderRadius: "8px",
+  padding: "8px 10px",
+  background: "transparent",
+  color: "inherit",
+  fontSize: "12px",
+  boxSizing: "border-box",
+};
+
+const row: CSSProperties = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" };
+
+const tabBar: CSSProperties = {
+  display: "flex",
+  gap: "2px",
+  borderRadius: "10px",
+  border: "1px solid var(--border)",
+  padding: "3px",
+  background: "color-mix(in srgb, var(--card, transparent) 50%, transparent)",
+};
+
+function tabStyle(active: boolean): CSSProperties {
+  return {
+    padding: "6px 16px",
+    borderRadius: "8px",
+    fontSize: "12px",
+    fontWeight: active ? 600 : 400,
+    opacity: active ? 1 : 0.6,
+    background: active ? "var(--card, transparent)" : "transparent",
+    border: active ? "1px solid var(--border)" : "1px solid transparent",
+    cursor: "pointer",
+    color: "inherit",
+  };
+}
+
+function KpiWidget({ eyebrow: label, value, sub }: { eyebrow: string; value: string | number; sub?: string }) {
+  return (
+    <div style={widget}>
+      <div style={eyebrow}>{label}</div>
+      <strong style={{ fontSize: "22px" }}>{value}</strong>
+      {sub && <div style={muted}>{sub}</div>}
+    </div>
+  );
+}
+
+function Section({ title, tag, action, children }: {
+  title: string; tag?: string; action?: ReactNode; children: ReactNode;
+}) {
+  return (
+    <section style={{ ...card, display: "grid", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+        <div style={row}>
+          <strong>{title}</strong>
+          {tag && <span style={pill}>{tag}</span>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+// --------------- KPI Summary ---------------
+
+function KpiSummary() {
+  const { data: projectsData } = usePluginData<{ data: Array<unknown> }>("projects");
+  const { data: leadsData } = usePluginData<{ leads: Array<unknown>; total: number }>("leads");
+  const { data: feedData } = usePluginData<{ data: Array<unknown> }>("feeds", { limit: 1 });
+  const { data: dmsData } = usePluginData<{ data: Array<unknown>; total: number }>("dm-conversations");
+
+  return (
+    <div style={widgetGrid}>
+      <KpiWidget eyebrow="Projects" value={projectsData?.data?.length ?? 0} />
+      <KpiWidget eyebrow="Total Leads" value={leadsData?.total ?? 0} />
+      <KpiWidget eyebrow="Tweets Scored" value={feedData?.data?.length ?? 0} />
+      <KpiWidget eyebrow="DM Threads" value={dmsData?.total ?? 0} />
+    </div>
+  );
+}
 
 // --------------- Projects Tab ---------------
 
 function ProjectsTab() {
   const { data, loading, error } = usePluginData<{
     data: Array<{
-      id: string;
-      name: string;
-      handleCount: number;
-      active: boolean;
-      bdPriorityThreshold: number | null;
-      speedTier: string | null;
+      id: string; name: string; handleCount: number;
+      active: boolean; bdPriorityThreshold: number | null; speedTier: string | null;
     }>;
   }>("projects");
   const createProject = usePluginAction("create-project");
@@ -91,77 +177,50 @@ function ProjectsTab() {
   const [newName, setNewName] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  if (loading) return <div style={s.loading}>Loading projects...</div>;
-  if (error) return <div style={s.error}>Error loading projects</div>;
+  if (loading) return <div style={muted}>Loading projects…</div>;
+  if (error) return <div style={{ color: "var(--destructive, #c00)", fontSize: "12px" }}>Error loading projects</div>;
 
   const projects = data?.data ?? [];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+    <div style={{ display: "grid", gap: "12px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: "14px", fontWeight: 600 }}>{projects.length} project{projects.length !== 1 ? "s" : ""}</span>
-        {!creating && (
-          <button style={s.btn} onClick={() => setCreating(true)}>+ Add Project</button>
-        )}
+        <div style={row}>
+          <strong>{projects.length} project{projects.length !== 1 ? "s" : ""}</strong>
+        </div>
+        {!creating && <button style={primaryBtn} onClick={() => setCreating(true)}>+ Add Project</button>}
       </div>
 
       {creating && (
-        <div style={{ ...s.card, display: "flex", gap: "8px", alignItems: "center" }}>
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Project name"
-            style={{
-              flex: 1,
-              background: "#111",
-              border: "1px solid #333",
-              borderRadius: "6px",
-              padding: "6px 10px",
-              color: "#e0e0e0",
-              fontSize: "13px",
-              outline: "none",
-            }}
-          />
-          <button
-            style={s.btn}
-            onClick={async () => {
-              if (!newName.trim()) return;
-              await createProject({ name: newName.trim() });
-              setNewName("");
-              setCreating(false);
-            }}
-          >
-            Create
-          </button>
-          <button style={s.btnGhost} onClick={() => { setCreating(false); setNewName(""); }}>Cancel</button>
+        <div style={{ ...subtleCard, display: "flex", gap: "8px", alignItems: "center" }}>
+          <input value={newName} onChange={(e) => setNewName(e.target.value)}
+            placeholder="Project name" style={{ ...input, flex: 1 }} />
+          <button style={primaryBtn} onClick={async () => {
+            if (!newName.trim()) return;
+            await createProject({ name: newName.trim() });
+            setNewName(""); setCreating(false);
+          }}>Create</button>
+          <button style={ghostBtn} onClick={() => { setCreating(false); setNewName(""); }}>Cancel</button>
         </div>
       )}
 
-      {projects.length === 0 && <div style={s.empty}>No projects yet. Create one to start tracking handles.</div>}
+      {projects.length === 0 && <div style={{ ...muted, textAlign: "center", padding: "24px" }}>No projects yet.</div>}
 
       {projects.map((p) => (
-        <div
-          key={p.id}
-          style={{ ...s.card, cursor: "pointer" }}
-          onClick={() => setExpanded(expanded === p.id ? null : p.id)}
-        >
+        <div key={p.id} style={{ ...subtleCard, cursor: "pointer" }}
+          onClick={() => setExpanded(expanded === p.id ? null : p.id)}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <span style={{ fontSize: "14px", fontWeight: 600, color: "#e0e0e0" }}>{p.name}</span>
-              {!p.active && (
-                <span style={{ marginLeft: "8px", color: "#666", fontSize: "11px" }}>inactive</span>
-              )}
+            <div style={row}>
+              <strong style={{ fontSize: "13px" }}>{p.name}</strong>
+              {!p.active && <span style={pill}>inactive</span>}
             </div>
-            <div style={{ display: "flex", gap: "12px", fontSize: "12px", color: "#888" }}>
-              <span>{p.handleCount} handles</span>
-              {p.speedTier && <span style={{ color: "#555" }}>{p.speedTier}</span>}
-              <span style={{ color: "#555" }}>{expanded === p.id ? "▲" : "▼"}</span>
+            <div style={{ ...row, gap: "8px" }}>
+              <span style={pill}>{p.handleCount} handles</span>
+              {p.speedTier && <span style={{ ...pill, opacity: 0.6 }}>{p.speedTier}</span>}
+              <span style={{ opacity: 0.4, fontSize: "11px" }}>{expanded === p.id ? "▲" : "▼"}</span>
             </div>
           </div>
-
-          {expanded === p.id && (
-            <ProjectDetail projectId={p.id} />
-          )}
+          {expanded === p.id && <ProjectDetail projectId={p.id} />}
         </div>
       ))}
     </div>
@@ -171,18 +230,13 @@ function ProjectsTab() {
 function ProjectDetail({ projectId }: { projectId: string }) {
   const { data, loading } = usePluginData<{
     data: {
-      id: string;
-      name: string;
-      handleCount: number;
-      bdPriorityThreshold: number | null;
-      scoringPrompt: string | null;
-      triggerKeywords: string | null;
-      outreachChannels: string | null;
-      tgGroupId: string | null;
+      id: string; name: string; handleCount: number;
+      bdPriorityThreshold: number | null; scoringPrompt: string | null;
+      triggerKeywords: string | null; outreachChannels: string | null; tgGroupId: string | null;
     };
   }>("project-detail", { id: projectId });
 
-  if (loading) return <div style={{ ...s.loading, padding: "8px 0" }}>Loading...</div>;
+  if (loading) return <div style={muted}>Loading…</div>;
   if (!data?.data) return null;
 
   const p = data.data;
@@ -192,26 +246,34 @@ function ProjectDetail({ projectId }: { projectId: string }) {
   try { channels = p.outreachChannels ? JSON.parse(p.outreachChannels) : []; } catch { /* skip */ }
 
   return (
-    <div
-      style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #222", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12px", color: "#aaa" }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div><span style={{ color: "#666" }}>BD threshold:</span> {p.bdPriorityThreshold ?? "--"}</div>
-      <div><span style={{ color: "#666" }}>TG Group:</span> {p.tgGroupId ?? "not set"}</div>
+    <div style={{
+      marginTop: "10px", paddingTop: "10px",
+      borderTop: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
+      display: "grid", gap: "6px", fontSize: "12px",
+    }} onClick={(e) => e.stopPropagation()}>
+      <div style={row}>
+        <span style={eyebrow}>BD threshold</span>
+        <span>{p.bdPriorityThreshold ?? "--"}</span>
+      </div>
+      <div style={row}>
+        <span style={eyebrow}>TG Group</span>
+        <span>{p.tgGroupId ?? "not set"}</span>
+      </div>
       {keywords.length > 0 && (
-        <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-          <span style={{ color: "#666" }}>Keywords:</span>
-          {keywords.map((k) => (
-            <span key={k} style={{ background: "#1f1f1f", borderRadius: "3px", padding: "1px 6px", fontSize: "11px" }}>{k}</span>
-          ))}
+        <div style={row}>
+          <span style={eyebrow}>Keywords</span>
+          {keywords.map((k) => <span key={k} style={pill}>{k}</span>)}
         </div>
       )}
       {channels.length > 0 && (
-        <div><span style={{ color: "#666" }}>Channels:</span> {channels.join(", ")}</div>
+        <div style={row}>
+          <span style={eyebrow}>Channels</span>
+          <span>{channels.join(", ")}</span>
+        </div>
       )}
       {p.scoringPrompt && (
-        <div style={{ color: "#555", fontSize: "11px", marginTop: "4px" }}>
-          Scoring prompt: {p.scoringPrompt.slice(0, 120)}{p.scoringPrompt.length > 120 ? "..." : ""}
+        <div style={{ ...muted, marginTop: "4px" }}>
+          Scoring: {p.scoringPrompt.slice(0, 120)}{p.scoringPrompt.length > 120 ? "…" : ""}
         </div>
       )}
     </div>
@@ -224,54 +286,39 @@ function LeadsTab() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const { data, loading, error, refresh } = usePluginData<{
     leads: Array<{
-      id: string;
-      handle: string;
-      status: string;
-      urgency: string | null;
-      projectId: string | null;
-      tweetId: string;
-      signalType: string | null;
-      createdAt: string | number | null;
-      updatedAt: string | number | null;
+      id: string; handle: string; status: string; urgency: string | null;
+      projectId: string | null; tweetId: string; signalType: string | null;
+      createdAt: string | number | null; updatedAt: string | number | null;
       detectedTgHandle: string | null;
-    }>;
-    total: number;
-    page: number;
-    totalPages: number;
+    }>; total: number; page: number; totalPages: number;
   }>("leads", statusFilter ? { status: statusFilter } : {});
 
   const updateLead = usePluginAction("update-lead");
-
   const handleUpdateStatus = async (id: string, status: string) => {
-    await updateLead({ id, status });
-    refresh();
+    await updateLead({ id, status }); refresh();
   };
 
   const statuses = ["", "new", "reviewing", "contacted", "sent", "tg_detected", "invited", "converted", "skipped", "snoozed", "rejected"];
 
-  if (loading) return <div style={s.loading}>Loading leads...</div>;
-  if (error) return <div style={s.error}>Error loading leads</div>;
+  if (loading) return <div style={muted}>Loading leads…</div>;
+  if (error) return <div style={{ color: "var(--destructive, #c00)", fontSize: "12px" }}>Error loading leads</div>;
 
   const leads = data?.leads ?? [];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: "14px", fontWeight: 600 }}>{data?.total ?? 0} leads</span>
-        <div style={{ display: "flex", gap: "4px" }}>
+    <div style={{ display: "grid", gap: "12px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+        <strong>{data?.total ?? 0} leads</strong>
+        <div style={{ ...row, gap: "4px" }}>
           {statuses.map((st) => (
-            <button
-              key={st || "__all"}
-              onClick={() => setStatusFilter(st)}
+            <button key={st || "__all"} onClick={() => setStatusFilter(st)}
               style={{
-                ...s.btnGhost,
-                padding: "3px 10px",
-                fontSize: "11px",
-                color: statusFilter === st ? "#60a5fa" : "#888",
-                borderColor: statusFilter === st ? "#1e3a5f" : "#333",
-                background: statusFilter === st ? "#0f1f33" : "transparent",
-              }}
-            >
+                ...btn, padding: "3px 10px", fontSize: "11px",
+                opacity: statusFilter === st ? 1 : 0.5,
+                background: statusFilter === st
+                  ? "color-mix(in srgb, var(--foreground) 10%, transparent)" : "transparent",
+                borderColor: statusFilter === st ? "var(--foreground)" : "var(--border)",
+              }}>
               {st || "All"}
             </button>
           ))}
@@ -279,27 +326,20 @@ function LeadsTab() {
       </div>
 
       {leads.length === 0 ? (
-        <div style={s.empty}>No leads{statusFilter ? ` with status "${statusFilter}"` : ""}.</div>
+        <div style={{ ...muted, textAlign: "center", padding: "24px" }}>
+          No leads{statusFilter ? ` with status "${statusFilter}"` : ""}.
+        </div>
       ) : (
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
             <thead>
               <tr>
                 {["Handle", "Status", "Urgency", "Project", "Signal", "Created", "TG", "Actions"].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      textAlign: "left",
-                      padding: "6px 12px",
-                      fontSize: "11px",
-                      color: "#666",
-                      fontWeight: 500,
-                      borderBottom: "1px solid #333",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {h}
-                  </th>
+                  <th key={h} style={{
+                    textAlign: "left", padding: "6px 12px", fontSize: "11px",
+                    fontWeight: 500, opacity: 0.5,
+                    borderBottom: "1px solid var(--border)", whiteSpace: "nowrap",
+                  }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -320,31 +360,22 @@ function LeadsTab() {
 function FeedTab() {
   const { data, loading, error } = usePluginData<{
     data: Array<{
-      id: string;
-      content: string | null;
-      createdAt: string | number | null;
-      aiScore: number | null;
-      aiSummary: string | null;
-      username: string | null;
-      displayName: string | null;
-      category: string | null;
-    }>;
-    page: number;
-    limit: number;
+      id: string; content: string | null; createdAt: string | number | null;
+      aiScore: number | null; aiSummary: string | null;
+      username: string | null; displayName: string | null; category: string | null;
+    }>; page: number; limit: number;
   }>("feeds", { limit: 30 });
 
-  if (loading) return <div style={s.loading}>Loading feed...</div>;
-  if (error) return <div style={s.error}>Error loading feed</div>;
+  if (loading) return <div style={muted}>Loading feed…</div>;
+  if (error) return <div style={{ color: "var(--destructive, #c00)", fontSize: "12px" }}>Error loading feed</div>;
 
   const tweets = data?.data ?? [];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <span style={{ fontSize: "14px", fontWeight: 600 }}>{tweets.length} recent tweets</span>
-      {tweets.length === 0 && <div style={s.empty}>No tweets in feed yet.</div>}
-      {tweets.map((t) => (
-        <TweetCard key={t.id} tweet={t} />
-      ))}
+    <div style={{ display: "grid", gap: "8px" }}>
+      <strong>{tweets.length} recent tweets</strong>
+      {tweets.length === 0 && <div style={{ ...muted, textAlign: "center", padding: "24px" }}>No tweets in feed yet.</div>}
+      {tweets.map((t) => <TweetCard key={t.id} tweet={t} />)}
     </div>
   );
 }
@@ -354,26 +385,21 @@ function FeedTab() {
 function DMsTab() {
   const { data, loading, error } = usePluginData<{
     data: Array<{
-      id: string;
-      accountUsername: string;
-      participantUsernames: string | null;
-      lastDmAt: string | null;
-      lastDmPreview: string | null;
-      detectedTgHandles: string | null;
-      projectId: string | null;
-    }>;
-    total: number;
+      id: string; accountUsername: string; participantUsernames: string | null;
+      lastDmAt: string | null; lastDmPreview: string | null;
+      detectedTgHandles: string | null; projectId: string | null;
+    }>; total: number;
   }>("dm-conversations");
 
-  if (loading) return <div style={s.loading}>Loading DM conversations...</div>;
-  if (error) return <div style={s.error}>Error loading DMs</div>;
+  if (loading) return <div style={muted}>Loading DMs…</div>;
+  if (error) return <div style={{ color: "var(--destructive, #c00)", fontSize: "12px" }}>Error loading DMs</div>;
 
   const convos = data?.data ?? [];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <span style={{ fontSize: "14px", fontWeight: 600 }}>{data?.total ?? 0} conversations</span>
-      {convos.length === 0 && <div style={s.empty}>No DM conversations synced yet.</div>}
+    <div style={{ display: "grid", gap: "8px" }}>
+      <strong>{data?.total ?? 0} conversations</strong>
+      {convos.length === 0 && <div style={{ ...muted, textAlign: "center", padding: "24px" }}>No DM conversations synced yet.</div>}
       {convos.map((c) => {
         let participants: string[] = [];
         try { participants = c.participantUsernames ? JSON.parse(c.participantUsernames) : []; } catch { /* skip */ }
@@ -381,34 +407,27 @@ function DMsTab() {
         try { tgHandles = c.detectedTgHandles ? JSON.parse(c.detectedTgHandles) : []; } catch { /* skip */ }
 
         return (
-          <div key={c.id} style={s.card}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontWeight: 600, fontSize: "13px" }}>
+          <div key={c.id} style={subtleCard}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+              <div style={row}>
+                <strong style={{ fontSize: "12px" }}>
                   {participants.length > 0 ? participants.map((p) => `@${p}`).join(", ") : c.accountUsername}
-                </span>
-                {tgHandles.length > 0 && tgHandles.map((h) => (
-                  <span
-                    key={h}
-                    style={{
-                      background: "#2e1065",
-                      color: "#8b5cf6",
-                      borderRadius: "4px",
-                      padding: "2px 6px",
-                      fontSize: "11px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    TG: {h}
-                  </span>
+                </strong>
+                {tgHandles.map((h) => (
+                  <span key={h} style={{
+                    ...pill,
+                    background: "color-mix(in srgb, #7c3aed 18%, transparent)",
+                    borderColor: "color-mix(in srgb, #7c3aed 60%, var(--border))",
+                    color: "#c4b5fd",
+                  }}>TG: {h}</span>
                 ))}
               </div>
-              <span style={{ color: "#555", fontSize: "11px" }}>
+              <span style={{ ...muted, whiteSpace: "nowrap" }}>
                 {c.lastDmAt ? new Date(c.lastDmAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}
               </span>
             </div>
             {c.lastDmPreview && (
-              <div style={{ color: "#888", fontSize: "12px", marginTop: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ ...muted, marginTop: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {c.lastDmPreview}
               </div>
             )}
@@ -423,12 +442,11 @@ function DMsTab() {
 
 function InsightsTab() {
   return (
-    <div style={s.card}>
-      <div style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px" }}>Insights</div>
-      <div style={{ color: "#555", fontSize: "13px" }}>
-        Coming soon. Outreach retrospectives, conversion funnel analysis, and pipeline health metrics will appear here.
+    <Section title="Insights" tag="beta">
+      <div style={muted}>
+        Outreach retrospectives, conversion funnel analysis, and pipeline health metrics will appear here.
       </div>
-    </div>
+    </Section>
   );
 }
 
@@ -436,25 +454,24 @@ function InsightsTab() {
 
 export function WatchdogDashboard({ context }: PluginPageProps) {
   const [tab, setTab] = useState<Tab>("projects");
-
-  const TabContent = { projects: ProjectsTab, leads: LeadsTab, feed: FeedTab, dms: DMsTab, insights: InsightsTab }[tab];
+  const Content = { projects: ProjectsTab, leads: LeadsTab, feed: FeedTab, dms: DMsTab, insights: InsightsTab }[tab];
 
   return (
-    <div style={s.page}>
-      <div>
-        <h1 style={s.header}>X Watchdog</h1>
-        <p style={s.subtitle}>BD pipeline — monitor X accounts, score leads, and manage outreach</p>
-      </div>
+    <div style={{ display: "grid", gap: "14px" }}>
+      {/* KPI Summary */}
+      <KpiSummary />
 
-      <div style={s.tabBar}>
-        {tabs.map((t) => (
-          <button key={t.key} style={s.tab(tab === t.key)} onClick={() => setTab(t.key)}>
+      {/* Tab bar */}
+      <div style={tabBar}>
+        {tabDefs.map((t) => (
+          <button key={t.key} style={tabStyle(tab === t.key)} onClick={() => setTab(t.key)}>
             {t.label}
           </button>
         ))}
       </div>
 
-      <TabContent />
+      {/* Tab content */}
+      <Content />
     </div>
   );
 }

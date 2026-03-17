@@ -17,79 +17,70 @@ function fmtDate(v: string | number | null): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+const pill = (bg: string, fg: string) => ({
+  display: "inline-flex" as const,
+  alignItems: "center" as const,
+  borderRadius: "999px",
+  border: `1px solid ${bg}`,
+  background: bg,
+  color: fg,
+  padding: "2px 8px",
+  fontSize: "11px",
+});
+
 export function TweetCard({ tweet }: { tweet: TweetItem }) {
   return (
-    <div
-      style={{
-        background: "#1a1a1a",
-        border: "1px solid #333",
-        borderRadius: "8px",
-        padding: "12px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {/* avatar placeholder */}
-        <div
-          style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "50%",
-            background: "#333",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#888",
-            fontSize: "14px",
-            fontWeight: 600,
-          }}
-        >
+    <div style={{
+      border: "1px solid var(--border)",
+      borderRadius: "12px",
+      padding: "12px 14px",
+      background: "var(--card, transparent)",
+      display: "grid",
+      gap: "8px",
+    }}>
+      {/* Header: avatar + name + score */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{
+          width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
+          background: "color-mix(in srgb, var(--foreground) 12%, transparent)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "14px", fontWeight: 600, opacity: 0.7,
+        }}>
           {(tweet.username ?? "?")[0].toUpperCase()}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: "#e0e0e0", fontSize: "13px", fontWeight: 600 }}>
+          <strong style={{ fontSize: "13px" }}>
             {tweet.displayName ?? tweet.username ?? "Unknown"}
-            <span style={{ color: "#666", fontWeight: 400, marginLeft: "6px" }}>
-              @{tweet.username}
-            </span>
-          </div>
+          </strong>
+          <span style={{ opacity: 0.5, marginLeft: "6px", fontSize: "12px" }}>
+            @{tweet.username}
+          </span>
         </div>
         <ScoreBadge score={tweet.aiScore} />
       </div>
 
-      <div
-        style={{
-          color: "#ccc",
-          fontSize: "13px",
-          lineHeight: "1.5",
-          whiteSpace: "pre-wrap",
-          overflow: "hidden",
-          maxHeight: "80px",
-        }}
-      >
+      {/* Content */}
+      <div style={{
+        fontSize: "12px", lineHeight: 1.5, opacity: 0.85,
+        whiteSpace: "pre-wrap", overflow: "hidden", maxHeight: "80px",
+      }}>
         {tweet.content ?? ""}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <span style={{ color: "#555", fontSize: "11px" }}>{fmtDate(tweet.createdAt)}</span>
+      {/* Footer: date + category + summary */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <span style={{ fontSize: "11px", opacity: 0.5 }}>{fmtDate(tweet.createdAt)}</span>
         {tweet.category && (
-          <span
-            style={{
-              background: "#1f1f1f",
-              color: "#888",
-              borderRadius: "4px",
-              padding: "1px 6px",
-              fontSize: "11px",
-            }}
-          >
-            {tweet.category}
-          </span>
+          <span style={pill(
+            "color-mix(in srgb, var(--border) 75%, transparent)",
+            "inherit",
+          )}>{tweet.category}</span>
         )}
         {tweet.aiSummary && (
-          <span style={{ color: "#666", fontSize: "11px", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{
+            fontSize: "11px", opacity: 0.55, flex: 1,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>
             {tweet.aiSummary}
           </span>
         )}

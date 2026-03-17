@@ -1,5 +1,6 @@
 import { usePluginData } from "@paperclipai/plugin-sdk/ui";
 import type { PluginWidgetProps } from "@paperclipai/plugin-sdk/ui";
+import type { CSSProperties } from "react";
 
 interface AnalyticsData {
   data: {
@@ -11,41 +12,85 @@ interface AnalyticsData {
   };
 }
 
-const kpiCard = (label: string, value: string | number, color: string) => (
-  <div
-    style={{
-      flex: "1 1 0",
-      minWidth: "100px",
-      background: "#111",
-      borderRadius: "6px",
-      padding: "10px 14px",
-      display: "flex",
-      flexDirection: "column" as const,
+const wrapper: CSSProperties = {
+  border: "1px solid var(--border)",
+  borderRadius: "12px",
+  padding: "14px",
+  background: "var(--card, transparent)",
+  display: "grid",
+  gap: "10px",
+};
+
+const eyebrow: CSSProperties = {
+  fontSize: "11px",
+  opacity: 0.65,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+};
+
+const widgetGrid: CSSProperties = {
+  display: "grid",
+  gap: "8px",
+  gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+};
+
+const tones = {
+  neutral: {
+    background: "color-mix(in srgb, var(--foreground) 8%, transparent)",
+    borderColor: "var(--border)",
+    color: "inherit",
+  },
+  green: {
+    background: "color-mix(in srgb, #16a34a 18%, transparent)",
+    borderColor: "color-mix(in srgb, #16a34a 60%, var(--border))",
+    color: "#86efac",
+  },
+  blue: {
+    background: "color-mix(in srgb, #2563eb 18%, transparent)",
+    borderColor: "color-mix(in srgb, #2563eb 60%, var(--border))",
+    color: "#93c5fd",
+  },
+  amber: {
+    background: "color-mix(in srgb, #d97706 18%, transparent)",
+    borderColor: "color-mix(in srgb, #d97706 60%, var(--border))",
+    color: "#fcd34d",
+  },
+} as const;
+
+function KpiCard({ label, value, tone }: { label: string; value: string | number; tone: keyof typeof tones }) {
+  const t = tones[tone];
+  return (
+    <div style={{
+      border: `1px solid ${t.borderColor}`,
+      borderRadius: "10px",
+      padding: "10px 12px",
+      background: t.background,
+      display: "grid",
       gap: "4px",
-    }}
-  >
-    <span style={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>{label}</span>
-    <span style={{ fontSize: "20px", fontWeight: 700, color }}>{value}</span>
-  </div>
-);
+    }}>
+      <span style={eyebrow}>{label}</span>
+      <span style={{ fontSize: "20px", fontWeight: 700, color: t.color }}>{value}</span>
+    </div>
+  );
+}
 
 export function PipelineSummary({ context }: PluginWidgetProps) {
   const { data, loading, error } = usePluginData<AnalyticsData>("analytics", { period: "7d" });
 
   if (loading) {
     return (
-      <div style={{ padding: "12px 16px", background: "#1a1a1a", borderRadius: "8px", border: "1px solid #333" }}>
-        <div style={{ fontSize: "13px", fontWeight: 600, color: "#e0e0e0", marginBottom: "8px" }}>X Watchdog Pipeline</div>
-        <div style={{ color: "#666", fontSize: "12px" }}>Loading...</div>
+      <div style={wrapper}>
+        <strong>X Watchdog Pipeline</strong>
+        <span style={{ fontSize: "12px", opacity: 0.5 }}>Loading...</span>
       </div>
     );
   }
 
   if (error || !data?.data) {
     return (
-      <div style={{ padding: "12px 16px", background: "#1a1a1a", borderRadius: "8px", border: "1px solid #333" }}>
-        <div style={{ fontSize: "13px", fontWeight: 600, color: "#e0e0e0", marginBottom: "8px" }}>X Watchdog Pipeline</div>
-        <div style={{ color: "#555", fontSize: "12px" }}>No analytics data available yet.</div>
+      <div style={wrapper}>
+        <strong>X Watchdog Pipeline</strong>
+        <span style={{ fontSize: "12px", opacity: 0.5 }}>No analytics data available yet.</span>
       </div>
     );
   }
@@ -58,16 +103,19 @@ export function PipelineSummary({ context }: PluginWidgetProps) {
   const topHandleCount = data.data.topHandles.length;
 
   return (
-    <div style={{ padding: "12px 16px", background: "#1a1a1a", borderRadius: "8px", border: "1px solid #333" }}>
-      <div style={{ fontSize: "13px", fontWeight: 600, color: "#e0e0e0", marginBottom: "10px" }}>
-        X Watchdog Pipeline
-        <span style={{ marginLeft: "8px", color: "#555", fontWeight: 400, fontSize: "11px" }}>7d</span>
+    <div style={wrapper}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <strong>X Watchdog Pipeline</strong>
+        <span style={{
+          display: "inline-flex", alignItems: "center", borderRadius: "999px",
+          border: "1px solid var(--border)", padding: "2px 8px", fontSize: "11px",
+        }}>7d</span>
       </div>
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        {kpiCard("Tweets Scanned", totalTweets, "#e0e0e0")}
-        {kpiCard("High Score", highScore, "#22c55e")}
-        {kpiCard("High Rate", `${convRate}%`, "#3b82f6")}
-        {kpiCard("Top Handles", topHandleCount, "#f59e0b")}
+      <div style={widgetGrid}>
+        <KpiCard label="Tweets Scanned" value={totalTweets} tone="neutral" />
+        <KpiCard label="High Score" value={highScore} tone="green" />
+        <KpiCard label="High Rate" value={`${convRate}%`} tone="blue" />
+        <KpiCard label="Top Handles" value={topHandleCount} tone="amber" />
       </div>
     </div>
   );

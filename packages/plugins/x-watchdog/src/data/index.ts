@@ -28,4 +28,13 @@ export function registerDataHandlers(ctx: PluginContext) {
   ctx.data.register("conversation-timeline", conversationTimelineHandler);
   ctx.data.register("retrospectives", retrospectivesHandler);
   ctx.data.register("template-performance", templatePerformanceHandler);
+
+  // Expose plugin config (instance config + UI-saved settings) for settings UI
+  ctx.data.register("plugin-config", async () => {
+    const instanceConfig = (await ctx.config.get()) ?? {};
+    const uiSettings = (await ctx.state.get(
+      { scopeKind: "instance", stateKey: "plugin_settings" },
+    )) ?? {};
+    return { data: { ...instanceConfig, ...(uiSettings as Record<string, unknown>) } };
+  });
 }
