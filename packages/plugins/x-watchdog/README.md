@@ -14,6 +14,35 @@ Chạy trên [Paperclip MC](https://github.com/paperclipai/paperclip) — tích 
 
 [![Xem video demo](https://img.shields.io/badge/▶_Xem_Demo-Google_Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?usp=sharing)
 
+<details>
+<summary><strong>Mục lục Video Demo (17 phút)</strong></summary>
+
+| Thời gian | Nội dung |
+|-----------|----------|
+| [00:00](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=0) | Giới thiệu — Tương lai của AI Agents |
+| [00:26](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=26) | Issues List — Danh sách task của agents |
+| [02:16](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=136) | CEO Agent Dashboard — Chi phí, hoạt động, tỉ lệ thành công |
+| [02:30](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=150) | BD Scorer Agent — Lead Analyst, pipeline scoring |
+| [04:53](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=293) | BD Writer Agent — Outreach Specialist |
+| [04:59](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=299) | BD Coordinator Agent — Pipeline Management |
+| [06:27](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=387) | X Watchdog Dashboard — Leads, Tweets, DMs |
+| [06:42](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=402) | Company Settings — Cấu hình công ty AI |
+| [06:48](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=408) | Plugin Manager — X Search, Discord, Telegram, Agency Agents |
+| [08:04](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=484) | Goals — Mục tiêu của công ty |
+| [09:20](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=560) | Org Chart — Sơ đồ tổ chức agents |
+| [10:17](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=617) | Discord Integration — Notifications & Approvals |
+| [11:30](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=690) | Project Settings — Cấu hình dự án (active/paused) |
+| [11:51](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=711) | Leads Tab — Danh sách leads từ agents |
+| [12:10](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=730) | Feed Tab — Tweets đã cào và chấm điểm |
+| [12:28](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=748) | DMs Tab — Quản lý tin nhắn X |
+| [12:45](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=765) | Insights Tab (beta) — Analytics & conversion funnel |
+| [13:07](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=787) | Search Config — Project keywords & scoring prompt |
+| [14:31](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=871) | Agent Workflow — BD Scorer → CEO approval flow |
+| [15:02](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=902) | BD Writer Workflow — Draft outreach & Discord oversight |
+| [17:25](https://drive.google.com/file/d/1y3VybA3bGnd2GKfTHSprAnLBiQWe-dgq/view?t=1045) | Tổng kết |
+
+</details>
+
 ---
 
 ## Cài đặt
